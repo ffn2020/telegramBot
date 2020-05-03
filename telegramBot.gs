@@ -42,7 +42,6 @@ function getFilePathVideo(file_id_vd) {
   var url = telegramUrl + "/getFile?file_id=" + file_id_vd;
   var response = UrlFetchApp.fetch(url);
   var data = JSON.parse(response);
-  //sh.appendRow([data.result.file_path])
   return data.result.file_path;
 }
 
@@ -52,7 +51,7 @@ function getVideoUrl(file_path_vd){
 }
 
 function doPost(e) {
-  // this is where telegram works
+  // Telegram works
   var logString = "";
   var data = JSON.parse(e.postData.contents);
   var chat_id = data.message.chat.id;
@@ -66,22 +65,17 @@ function doPost(e) {
     name = name + " " + data.message.chat.last_name;
   }
   var answer = "Hi " + name + ",";
-  var answer1 = ""; // TO BE USED WHEN USER SELECTS /CHECK OR /INFO
+  var answer1 = "";               // TO BE USED WHEN USER SELECTS /CHECK OR /INFO
   var photo = data.message.photo;
   var video = data.message.video;
-  //sh.appendRow([photo, "photo"]);
   if(photo != undefined){ //IMAGE ->
-    //var shT = SpreadsheetApp.openById(ssId).getSheets()[0];
-    //sh.appendRow([data, "in pic"]);
     var file_id_ph = data.message.photo[0].file_id;
-    //sh.appendRow([file_id, "file_id"]);
     var file_path_ph = getFilePathPhoto(file_id_ph)
     var file_url_ph = getImageUrl(file_path_ph);
     var file_unique_id_ph = data.message.photo[0].file_unique_id;
     var caption_ph = data.message.caption;
     
     var searchImageResult = doImageSearch(file_path_ph);
-    //shT.appendRow([file_id, file_path, file_url, file_unique_id, searchImageResult]);
     if(searchImageResult != -1) {
       Logger.log("Found");
       var sh0 = SpreadsheetApp.openById(ssId).getSheets()[0];
@@ -98,28 +92,22 @@ function doPost(e) {
     } else {
       Logger.log("Entry for image");
       var sh1 = SpreadsheetApp.openById(ssId).getSheets()[1];
-      //sh1.appendRow(["Image not found - inside else"]);
       answer = answer + "\n\nThank you for reaching out!";
       answer = answer + "\n\nFight Fake News team is on it. Once we verify your content, we'll get back to you with details.";
       answer = answer + "\n\nIn case, we are not able to verify the message shared by you, we will update you accordingly.";
       answer = answer + "\n\n#StayHomeStaySafe \n#StayAwayFromRumours";
       answer = answer + "\n\nP.S. This is an automated message please do not reply.";
       var activeRowCount = sh1.getLastRow();
-      //Id	Chat_Id	Name	Item	Conclusion	isResponseSent	Source/Comments	Item_Id_From_Items_Sheet	Request Date	Response Date
       sh1.appendRow([activeRowCount, chat_id, name, file_path_ph,,0,,,new Date(),,,file_url_ph, caption_ph]);
     }
   }else if(video != undefined){ //VIDEO ->
-    //var shT = SpreadsheetApp.openById(ssId).getSheets()[0];
-    //sh.appendRow([data, "in pic"]);
     var file_id_vd = data.message.video.file_id;
-    //sh.appendRow([file_id, "file_id"]);
     var file_path_vd = getFilePathVideo(file_id_vd)
     var file_url_vd = getVideoUrl(file_path_vd);
     var file_unique_id_vd = data.message.video.file_unique_id;
     var caption_vd = data.message.caption;
     
     var searchVideoResult = doVideoSearch(file_path_vd);
-    //shT.appendRow([file_id, file_path, file_url, file_unique_id, searchImageResult]);
     if(searchVideoResult != -1) {
       Logger.log("Found");
       var sh0 = SpreadsheetApp.openById(ssId).getSheets()[0];
@@ -136,14 +124,12 @@ function doPost(e) {
     } else {
       Logger.log("Entry for Video");
       var sh1 = SpreadsheetApp.openById(ssId).getSheets()[1];
-      //sh1.appendRow(["Image not found - inside else"]);
       answer = answer + "\n\nThank you for reaching out!";
       answer = answer + "\n\nFight Fake News team is on it. Once we verify your content, we'll get back to you with details.";
       answer = answer + "\n\nIn case, we are not able to verify the message shared by you, we will update you accordingly.";
       answer = answer + "\n\n#StayHomeStaySafe \n#StayAwayFromRumours";
       answer = answer + "\n\nP.S. This is an automated message please do not reply.";
       var activeRowCount = sh1.getLastRow();
-      //Id	Chat_Id	Name	Item	Conclusion	isResponseSent	Source/Comments	Item_Id_From_Items_Sheet	Request Date	Response Date
       sh1.appendRow([activeRowCount, chat_id, name, file_path_vd,,0,,,new Date(),,,file_url_vd, caption_vd]);
     }
   } else {
@@ -151,7 +137,6 @@ function doPost(e) {
     var text = data.message.text;
     
     logString += " Inside doPost for chatId: "+chat_id+", user_name: "+name;
-    //GmailApp.sendEmail(Session.getEffectiveUser().getEmail(), "Log b4 textLength Check ", JSON.stringify(text));
     if(text.length < 10) {
       if(text == "/start") {
         answer = answer + "\n\nWelcome to Covid19: Fight Fake News Telegram Bot!!!";
@@ -175,7 +160,6 @@ function doPost(e) {
       }
     } else {
       var searchResult = doSearch(text);
-      //GmailApp.sendEmail(Session.getEffectiveUser().getEmail(), "after doSearch "+searchResult, JSON.stringify(text));
       logString = logString + ". result of doSearch Method: "+searchResult;
       if(searchResult != -1) {
         Logger.log("Found");
@@ -192,7 +176,6 @@ function doPost(e) {
         }
         sh.getRange(searchResult, 5).setValue(checkCount+1);
         var mailRes = answer + "\n\nLogs for Developer: " +logString;
-        //GmailApp.sendEmail(emailId, "Responded to user with chatId -> " + chat_id, JSON.stringify(mailRes));
       }
       else {
           Logger.log("Not Found");
@@ -203,7 +186,6 @@ function doPost(e) {
         answer = answer + "\n\n#StayHomeStaySafe \n#StayAwayFromRumours";
         answer = answer + "\n\nP.S. This is an automated message please do not reply.";
         activeRowCount = sh.getLastRow();
-        //Id	Chat_Id	Name	Item	Conclusion	isResponseSent	Source/Comments	Item_Id_From_Items_Sheet	Request Date	Response Date
         sh.appendRow([activeRowCount, chat_id, name, text,,0,,,new Date()]);
         //var mailRes = answer + text + "\n\n Logs for Developer: " +logString;
         //GmailApp.sendEmail(emailId, "New Item added for verification for user_chat_id -> " + chat_id, JSON.stringify(mailRes));
@@ -226,12 +208,10 @@ function doImageSearch(file_path_ph) {
   var activeRowCount = sh.getLastRow();
   for(var i=1;i<=activeRowCount;i++){
     var item = sh.getRange(i, 2).getValue();
-    //sh.appendRow([i, file_path, item])
     if(item.indexOf(file_path_ph)>-1) {
       return i;
     }
   }
-  //sh.appendRow(["image item not found"]);
   return -1;
 }
 
@@ -240,12 +220,10 @@ function doVideoSearch(file_path_vd) {
   var activeRowCount = sh.getLastRow();
   for(var i=1;i<=activeRowCount;i++){
     var item = sh.getRange(i, 2).getValue();
-    //sh.appendRow([i, file_path, item])
     if(item.indexOf(file_path_vd)>-1) {
       return i;
     }
   }
-  //sh.appendRow(["image item not found"]);
   return -1;
 }
 
@@ -266,8 +244,6 @@ function doSearch(searchKey) {
   } else {
     arr = searchKey.split(" ");
   }
-  //GmailApp.sendEmail(Session.getEffectiveUser().getEmail(), "Log isUrl -> "+isUrl, JSON.stringify(arr));
-  // Verify URLs
   if(isUrl == true) {
     for(var i=1;i<=activeRowCount;i++){
       var item = sh.getRange(i, 2).getValue();
@@ -322,7 +298,6 @@ function doReplyPostManualVerification() {
       }
       answer = answer + "\n\n#StayHomeStaySafe \n#StayAwayFromRumours";
       answer = answer + "\n\nTo verify another claim/news/message, kindly use the /check command. \n\nTo know more about the bot, use /info command. \n\nTo follow us on Twitter (The_FFN_Network) for the latest updates, use /twitter command.";
-      //GmailApp.sendEmail(emailId, "Responded to user with chatId -> " + chatId, JSON.stringify(answer));
       sendText(chatId,answer);
       var itemId = updateValidatedItems(item, conclusion, reference);
       sh.getRange(i, 6).setValue(1);
@@ -335,7 +310,6 @@ function doReplyPostManualVerification() {
 function updateValidatedItems(item, conclusion, reference) {
   var sh = SpreadsheetApp.openById(ssId).getSheets()[0];
   var activeRowCount = sh.getLastRow();
-  //Id	Items	Conclusion	Source/Comments	Check Count
   sh.appendRow([activeRowCount, item, conclusion, reference, 1]);
   return activeRowCount;
 }
